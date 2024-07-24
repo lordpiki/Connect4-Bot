@@ -1,8 +1,9 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <bitset>
 
-
+using std::bitset;
 using std::string;
 
 
@@ -48,27 +49,16 @@ public:
 			std::cout << letter;
 		}
 	}
-	static void printUint64(uint64_t num, int maxRows, int maxCols)
+	static void printBitset(const bitset<42>& bitset)
 	{
-		// Print the board
-		for (int i = maxRows - 1; i >= 0; i--)
+		for (int i = 0; i < 6; i++)
 		{
-			for (int j = 0; j < maxCols; j++)
+			for (int j = 0; j < 7; j++)
 			{
-				uint64_t mask = 1;
-				mask <<= (i * maxRows + j);
-				if (num & mask)
-				{
-					Helper::printWithColor("1 ", "red");
-				}
-				else
-				{
-					Helper::printWithColor("0 ", "white");
-				}
+				std::cout << bitset[i * 7 + j] << " ";
 			}
 			std::cout << std::endl;
 		}
-		std::cout << std::endl;
 	}
 };
 

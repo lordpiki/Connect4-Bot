@@ -5,8 +5,8 @@ class Bot
 {
 public:
 
-	Bot(bool isRed){}
-	int miniMax(Board board, bool isRed);
+	Bot(){}
+	static int miniMax(Board board, bool isRed);
 
 private:
 

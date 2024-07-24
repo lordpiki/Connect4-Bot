@@ -11,19 +11,14 @@ int main()
 
     uint64_t num = 1;
     Board board;
-    // fill the board
-   
-    for (int i = 0; i < 7; i++)
-	{
-        for (int j = 0; j < 7; j++)
-        {
-            board.playMove(i, RED);
-        }
-	}
+    board.isWinningMove(0, RED);
     board.printBoard();
-    return 0;
-    Bot bot(RED);
-    std::cout << bot.miniMax(board, RED) << "\n";
+    board.playMove(1, RED);
+    board.playMove(1, YELLOW);
+    board.playMove(2, RED);
+    board.playMove(2, YELLOW);
+    board.printBoard();
+    std::cout << Bot::miniMax(board, RED) << "\n";
 
 
 

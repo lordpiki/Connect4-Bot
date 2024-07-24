@@ -12,10 +12,12 @@ int Bot::miniMax(Board board, bool isRed)
     if (board.isFull()) return 0;
 
     // Score = num of spaces after winning (WIDTH * HEIGHT / 2 - numMoves)
+	board.printBoard();
     for (uint8_t i = 0; i < Board::WIDTH; i++)
 	{
 		if (!board.isColumnFull(i) && board.isWinningMove(i, isRed))
 		{
+			board.printBoard();
 			return Board::WIDTH * Board::HEIGHT + 1 - board.getMoves() / 2;
 		}
 	}
@@ -29,13 +31,12 @@ int Bot::miniMax(Board board, bool isRed)
 		{
 			// Create new board and play the move
 			Board newBoard(board);
-			newBoard.playMove(i, -isRed);
+			newBoard.playMove(i, isRed);
 			// Recursively call miniMax to get score
-			int score = -miniMax(newBoard, -isRed);
+			int score = -miniMax(newBoard, !isRed);
 			// Update best score
 			bestScore = std::max(bestScore, score);
 		}
 	}
-	cout << "here";
 	return bestScore;
 }
