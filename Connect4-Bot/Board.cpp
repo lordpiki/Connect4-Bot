@@ -3,161 +3,112 @@
 #include <iostream>
 #include <string>
 
-bool Board::checkWinForColor(bool isRed) const
-{
-    uint64_t board = isRed ? red_board : yellow_board;
+bool Board::checkWinForColor(bool isRed) const {
+    bitset<BITS_LEN> board = isRed ? redBoard : yellowBoard;
 
     // Horizontal check
-    uint64_t h = board & (board >> 1);
-    if (h & (h >> 2)) return true;
+    bitset<BITS_LEN> h = board & (board >> 1);
+    if ((h & (h >> 2)).any()) return true;
 
     // Vertical check
-    uint64_t v = board & (board >> BOARD_HEIGHT);
-    if (v & (v >> (2 * BOARD_HEIGHT))) return true;
+    bitset<BITS_LEN> v = board & (board >> BOARD_HEIGHT);
+    if ((v & (v >> (2 * BOARD_HEIGHT))).any()) return true;
 
     // Diagonal \ check
-    uint64_t diagonal1 = board & (board >> (BOARD_WIDTH + 1));
-    if (diagonal1 & (diagonal1 >> (2 * (BOARD_WIDTH + 1)))) return true;
+    bitset<BITS_LEN> diagonal1 = board & (board >> (BOARD_WIDTH + 1));
+    if ((diagonal1 & (diagonal1 >> (2 * (BOARD_WIDTH + 1)))).any()) return true;
 
     // Diagonal / check
-    uint64_t diagonal2 = board & (board >> (BOARD_WIDTH - 1));
-    if (diagonal2 & (diagonal2 >> (2 * (BOARD_WIDTH - 1)))) return true;
+    bitset<BITS_LEN> diagonal2 = board & (board >> (BOARD_WIDTH - 1));
+    if ((diagonal2 & (diagonal2 >> (2 * (BOARD_WIDTH - 1)))).any()) return true;
 
     return false;
 }
 
-bool Board::isColumnFull(uint8_t column) const
-{
+bool Board::isColumnFull(uint8_t column) const {
     // Check for out of bounds
-    if (column >= BOARD_WIDTH)
-	{
-		throw std::out_of_range("Column " + std::to_string(column) + " out of bounds [0-6]");
-	}
-
-    // Column mask
-    uint64_t single_mask = 1;
-    single_mask <<= column;
-
-    // Full board is the union of red and yellow boards
-    uint64_t full_board = red_board | yellow_board;
-
-    // Check if the column is full
-    for (uint8_t i = 0; i < BOARD_HEIGHT; i++)
-	{
-        single_mask << (i * BOARD_WIDTH);
-		if (!(full_board & single_mask ))
-		{
-			return false;
-		}
-	}
-    return true;
-}
-
-void Board::playMove(uint8_t column, bool isRed)
-{
-    // Check for out of bounds
-    if (column >= BOARD_WIDTH)
-    {
+    if (column >= BOARD_WIDTH) {
         throw std::out_of_range("Column " + std::to_string(column) + " out of bounds [0-6]");
     }
 
-    // Column mask
-    // Example: column = 4, single_mask = 00010000. (Example for uint8)
-    uint64_t single_mask = 1;
-    single_mask <<= column;
+    // Combined board for red and yellow
+    bitset<BITS_LEN> full_board = redBoard | yellowBoard;
+
+    // Check if the top bit of the column is set
+    return full_board.test(column + (BOARD_HEIGHT - 1) * BOARD_WIDTH);
+
+}
+
+bool Board::isWinningMove(uint8_t column, bool isRed) {
+    playMove(column, isRed);
+    bool win = checkWinForColor(isRed);
+    undoMove(column, isRed);
+    return win;
+}
+
+void Board::playMove(uint8_t column, bool isRed) {
+    // Check for out of bounds
+    if (isColumnFull(column)) {
+        throw std::invalid_argument("Column " + std::to_string(column) + " is full");
+    }
 
     // Combined board for red and yellow
-    // We don't care about the color, only where the pieces are
-    uint64_t full_board = red_board | yellow_board;
+    bitset<BITS_LEN> full_board = redBoard | yellowBoard;
 
     // Go through the column and find the first empty spot
-    for (uint8_t i = 0; i < BOARD_HEIGHT; i++)
-    {
-        // Create a mask of the row
-        // Move the single mask to the correct row
-        uint64_t row_mask = single_mask << (i * BOARD_WIDTH);
-
-        // Check if the row is empty
-        if (!(full_board & row_mask))
-        {
-            if (isRed)
-            {
-                red_board |= single_mask << (i * BOARD_WIDTH);
+    for (int i = 0; i < BOARD_HEIGHT; ++i) {
+        int position = column + i * BOARD_WIDTH;
+        if (!full_board.test(position)) {
+            if (isRed) {
+                redBoard.set(position);
             }
-            else
-            {
-                yellow_board |= single_mask << (i * BOARD_WIDTH);
+            else {
+                yellowBoard.set(position);
             }
+            ++numMoves;
             return;
         }
     }
-
-    throw std::invalid_argument("Column " + std::to_string(column) + " is full");
 }
 
-void Board::printBoard() const
-{
-    // Print the board
-	for (int i = BOARD_HEIGHT - 1; i >= 0; i--)
-	{
-		for (int j = 0; j < BOARD_WIDTH; j++)
-		{
-            uint64_t mask = 1;
-            mask <<= (i * BOARD_WIDTH + j);
-			if (red_board & mask)
-			{
-                printWithColor("R ", "red");
-			}
-			else if (yellow_board & mask)
-			{
-                printWithColor("Y ", "yellow");
-			}
-			else
-			{
-				printWithColor(". ", "white");
-			}
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
+// SHOULD ONLY BE CALLED RIGHT AFTER playMove TO AVOID UNDEFINED BEHAVIOR
+void Board::undoMove(uint8_t column, bool isRed) {
+    // Check for out of bounds
+    if (column >= BOARD_WIDTH) {
+        throw std::out_of_range("Column " + std::to_string(column) + " out of bounds [0-6]");
+    }
+
+    // Go through the column and find the first filled spot
+    for (int i = BOARD_HEIGHT - 1; i >= 0; --i) {
+        int position = column + i * BOARD_WIDTH;
+        if (isRed && redBoard.test(position)) {
+            redBoard.reset(position);
+            --numMoves;
+            return;
+        }
+        else if (!isRed && yellowBoard.test(position)) {
+            yellowBoard.reset(position);
+            --numMoves;
+            return;
+        }
+    }
 }
 
-void Board::printWithColor(const string& letter, const string& color)
-{
-    if (color == "red")
-    {
-		std::cout << "\033[1;31m" << letter << "\033[0m";
-	}
-	else if (color == "yellow")
-	{
-		std::cout << "\033[1;33m" << letter << "\033[0m";
-	}
-	else if (color == "green")
-	{
-		std::cout << "\033[1;32m" << letter << "\033[0m";
-	}
-	else if (color == "blue")
-	{
-		std::cout << "\033[1;34m" << letter << "\033[0m";
-	}
-	else if (color == "magenta")
-	{
-		std::cout << "\033[1;35m" << letter << "\033[0m";
-	}
-	else if (color == "cyan")
-	{
-		std::cout << "\033[1;36m" << letter << "\033[0m";
-	}
-	else if (color == "white")
-	{
-		std::cout << "\033[1;37m" << letter << "\033[0m";
-	}
-	else if (color == "black")
-	{
-		std::cout << "\033[1;30m" << letter << "\033[0m";
-	}
-	else
-	{
-		std::cout << letter;
-	}
+void Board::printBoard() const {
+    for (int i = BOARD_HEIGHT - 1; i >= 0; --i) {
+        for (int j = 0; j < BOARD_WIDTH; ++j) {
+            int position = i * BOARD_WIDTH + j;
+            if (redBoard.test(position)) {
+                Helper::printWithColor("R ", "red");
+            }
+            else if (yellowBoard.test(position)) {
+                Helper::printWithColor("Y ", "yellow");
+            }
+            else {
+                Helper::printWithColor(". ", "white");
+            }
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }

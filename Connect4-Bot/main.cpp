@@ -1,23 +1,29 @@
 #include <iostream>
 #include "Board.h"
-
+#include "Bot.h"
+#include "Helper.h"
+#include <stdint.h>
 #define RED true
 #define YELLOW false    
 
 int main()
 {
-    Board board;
-    board.playMove(0, RED);
-    board.playMove(1, RED);
-    board.playMove(1, RED);
-    board.playMove(2, RED);
-    board.playMove(2, RED);
-    board.playMove(2, RED);
-    board.playMove(3, YELLOW);
-    board.playMove(3, RED);
-    board.playMove(3, RED);
-    board.playMove(3, RED);
 
+    uint64_t num = 1;
+    Board board;
+    // fill the board
+   
+    for (int i = 0; i < 7; i++)
+	{
+        for (int j = 0; j < 7; j++)
+        {
+            board.playMove(i, RED);
+        }
+	}
+    board.printBoard();
+    return 0;
+    Bot bot(RED);
+    std::cout << bot.miniMax(board, RED) << "\n";
 
 
 
