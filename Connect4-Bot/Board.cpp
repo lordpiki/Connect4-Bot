@@ -26,6 +26,28 @@ void Board::play(uint8_t cell)
 
 }
 
+void Board::unplay(uint8_t cell)
+{
+	if (cell >= BOARD_WIDTH) {
+		throw std::out_of_range("Cell index out of range");
+	}
+
+	auto& current_board = !m_redMove ? m_redBoard : m_yellowBoard;
+	auto full_board = m_redBoard | m_yellowBoard;
+
+	for (int8_t row = 0 ; row < BOARD_HEIGHT - 1; row++)
+	{
+		auto mask = (1ULL << (row * BOARD_WIDTH + cell));
+
+		if (full_board & mask) {
+			current_board ^= mask;
+			switch_turn();
+			return;
+		}
+	}
+	throw std::invalid_argument("Column is empty, cannot unplay here");
+}
+
 bool Board::is_cell_full(uint8_t cell) const
 {
 	if (cell >= BOARD_WIDTH) {

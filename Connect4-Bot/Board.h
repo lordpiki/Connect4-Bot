@@ -26,6 +26,9 @@ public:
     // Modifiers
     void play(uint8_t cell);
 
+	// Unplay a move, used for undo functionality (Only for bot)
+    void unplay(uint8_t cell);
+    
     // Checkers
     bool is_cell_full(uint8_t cell) const;
 
