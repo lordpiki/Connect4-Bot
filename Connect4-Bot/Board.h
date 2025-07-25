@@ -1,47 +1,62 @@
 #pragma once
 #include <bitset>
 #include <string>
-#include "Helper.h"
 
 using std::bitset;
 using std::string;
 
-#define BOARD_WIDTH 7
-#define BOARD_HEIGHT 6
-#define BITS_LEN 42
+constexpr uint8_t BOARD_WIDTH = 7;
+constexpr uint8_t BOARD_HEIGHT = 6;
+
+enum class GameState : uint8_t {
+    InProgress = 0,
+    RedWon = 1,
+    YellowWon = 2,
+    Draw = 3
+};
+
 
 class Board {
 public:
-    static const int WIDTH = BOARD_WIDTH;
-    static const int HEIGHT = BOARD_HEIGHT;
 
-    Board() : redBoard(), yellowBoard(), numMoves(0) {}
-    Board(const bitset<BITS_LEN>& redBoard, const bitset<BITS_LEN>& yellowBoard) : redBoard(redBoard), yellowBoard(yellowBoard), numMoves(0) {}
+    Board() : m_redBoard(), m_yellowBoard(), m_numMoves(0), m_redMove(0) {}
+    Board(uint64_t redBoard, uint64_t yellowBoard) : m_redBoard(redBoard), m_yellowBoard(yellowBoard), m_numMoves(0), m_redMove(0) {}
+
+
+    // Modifiers
+    void play(uint8_t cell);
 
     // Checkers
-    bool checkWinForColor(bool isRed) const;
-    bool isColumnFull(uint8_t column) const;
-    bool isFull() const { return numMoves == BOARD_WIDTH * BOARD_HEIGHT; }
-    bool isWinningMove(uint8_t column, bool isRed);
+    bool is_cell_full(uint8_t cell) const;
 
     // Getters
-    uint8_t getMoves() const { return numMoves; }
-    const bitset<BITS_LEN>& getRedBoard() const { return redBoard; }
-    const bitset<BITS_LEN>& getYellowBoard() const { return yellowBoard; }
+    GameState get_game_state() const;
 
-    // Normal functions
-    void playMove(uint8_t column, bool isRed);
-    void undoMove(uint8_t column, bool isRed);
-    void printBoard() const;
+	// Print the board state
+    void print();
 
     // Operators
-    bool operator==(const Board& other) const { return redBoard == other.redBoard && yellowBoard == other.yellowBoard; }
+    bool operator==(const Board& other) const { return m_redBoard == other.m_redBoard && m_yellowBoard == other.m_yellowBoard; }
 
 private:
     // Using bitset to represent the board
-    bitset<BITS_LEN> redBoard;
-    bitset<BITS_LEN> yellowBoard;
+    uint64_t m_redBoard;
+    uint64_t m_yellowBoard;
 
     // Number of moves played
-    uint8_t numMoves;
+    uint32_t m_numMoves;
+
+	// Current player's turn
+    bool m_redMove;
+        
+	// Modifiers
+
+	// Switch turn between red and yellow
+    void switch_turn() { m_redMove = !m_redMove; }
+
+    // Checkers
+    static bool check_win(uint64_t board);
+	static bool check_vertical_win(uint64_t board);
+	static bool check_horizontal_win(uint64_t board);
+    static bool check_diagonal(uint64_t board);
 };

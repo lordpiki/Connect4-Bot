@@ -3,112 +3,145 @@
 #include <iostream>
 #include <string>
 
-bool Board::checkWinForColor(bool isRed) const {
-    bitset<BITS_LEN> board = isRed ? redBoard : yellowBoard;
+void Board::play(uint8_t cell)
+{
+	if (cell >= BOARD_WIDTH) {
+		throw std::out_of_range("Cell index out of range");
+	}
 
-    // Horizontal check
-    bitset<BITS_LEN> h = board & (board >> 1);
-    if ((h & (h >> 2)).any()) return true;
+	auto& current_board = m_redMove ? m_redBoard : m_yellowBoard;
+	auto full_board = m_redBoard | m_yellowBoard;
 
-    // Vertical check
-    bitset<BITS_LEN> v = board & (board >> BOARD_HEIGHT);
-    if ((v & (v >> (2 * BOARD_HEIGHT))).any()) return true;
+	for (int8_t row = BOARD_HEIGHT - 1; row >= 0; row--)
+	{
+		auto mask = (1ULL << (row * BOARD_WIDTH + cell));
 
-    // Diagonal \ check
-    bitset<BITS_LEN> diagonal1 = board & (board >> (BOARD_WIDTH + 1));
-    if ((diagonal1 & (diagonal1 >> (2 * (BOARD_WIDTH + 1)))).any()) return true;
-
-    // Diagonal / check
-    bitset<BITS_LEN> diagonal2 = board & (board >> (BOARD_WIDTH - 1));
-    if ((diagonal2 & (diagonal2 >> (2 * (BOARD_WIDTH - 1)))).any()) return true;
-
-    return false;
-}
-
-bool Board::isColumnFull(uint8_t column) const {
-    // Check for out of bounds
-    if (column >= BOARD_WIDTH) {
-        throw std::out_of_range("Column " + std::to_string(column) + " out of bounds [0-6]");
-    }
-
-    // Combined board for red and yellow
-    bitset<BITS_LEN> full_board = redBoard | yellowBoard;
-
-    // Check if the top bit of the column is set
-    return full_board.test(column + (BOARD_HEIGHT - 1) * BOARD_WIDTH);
+		if (!(full_board& mask)) {
+			current_board |= mask;
+			switch_turn();
+			return;
+		}
+	}
+	throw std::invalid_argument("Column is full, cannot play here");
 
 }
 
-bool Board::isWinningMove(uint8_t column, bool isRed) {
-    playMove(column, isRed);
-    bool win = checkWinForColor(isRed);
-    undoMove(column, isRed);
-    return win;
+bool Board::is_cell_full(uint8_t cell) const
+{
+	if (cell >= BOARD_WIDTH) {
+		throw std::out_of_range("Cell index out of range");
+	}
+
+	auto full_board = m_redBoard | m_yellowBoard;
+	auto mask = (1ULL << cell);
+
+	return full_board & mask;
 }
 
-void Board::playMove(uint8_t column, bool isRed) {
-    // Check for out of bounds
-    if (isColumnFull(column)) {
-        throw std::invalid_argument("Column " + std::to_string(column) + " is full");
-    }
+GameState Board::get_game_state() const
+{
+	if (m_numMoves == BOARD_WIDTH * BOARD_HEIGHT)
+	{
+		return GameState::Draw; // Board is full, it's a draw
+	}
 
-    // Combined board for red and yellow
-    bitset<BITS_LEN> full_board = redBoard | yellowBoard;
+	if (check_win(m_redBoard))
+	{
+		return GameState::RedWon; // Red player has won
+	}
+	if (check_win(m_yellowBoard))
+	{
+		return GameState::YellowWon; // Yellow player has won
+	}
 
-    // Go through the column and find the first empty spot
-    for (int i = 0; i < BOARD_HEIGHT; ++i) {
-        int position = column + i * BOARD_WIDTH;
-        if (!full_board.test(position)) {
-            if (isRed) {
-                redBoard.set(position);
-            }
-            else {
-                yellowBoard.set(position);
-            }
-            ++numMoves;
-            return;
-        }
-    }
+	return GameState::InProgress;
 }
 
-// SHOULD ONLY BE CALLED RIGHT AFTER playMove TO AVOID UNDEFINED BEHAVIOR
-void Board::undoMove(uint8_t column, bool isRed) {
-    // Check for out of bounds
-    if (column >= BOARD_WIDTH) {
-        throw std::out_of_range("Column " + std::to_string(column) + " out of bounds [0-6]");
-    }
-
-    // Go through the column and find the first filled spot
-    for (int i = BOARD_HEIGHT - 1; i >= 0; --i) {
-        int position = column + i * BOARD_WIDTH;
-        if (isRed && redBoard.test(position)) {
-            redBoard.reset(position);
-            --numMoves;
-            return;
-        }
-        else if (!isRed && yellowBoard.test(position)) {
-            yellowBoard.reset(position);
-            --numMoves;
-            return;
-        }
-    }
+void Board::print()
+{
+	// Print the entire board, with red and yellow pieces represented by 'R' and 'Y'
+	std::cout << "Current Board State:\n";
+	for (uint8_t row = 0; row < BOARD_HEIGHT; ++row) {
+		for (uint8_t col = 0; col < BOARD_WIDTH; ++col) {
+			uint8_t cell_index = row * BOARD_WIDTH + col;
+			if (m_redBoard & (1ULL << cell_index)) {
+				std::cout << 'O'; // Red piece
+			} else if (m_yellowBoard & (1ULL << cell_index)) {
+				std::cout << 'X'; // Yellow piece
+			} else {
+				std::cout << '.'; // Empty cell
+			}
+		}
+		std::cout << '\n';
+	}
 }
 
-void Board::printBoard() const {
-    for (int i = BOARD_HEIGHT - 1; i >= 0; --i) {
-        for (int j = 0; j < BOARD_WIDTH; ++j) {
-            int position = i * BOARD_WIDTH + j;
-            if (redBoard.test(position)) {
-                Helper::printWithColor("R ", "red");
-            }
-            else if (yellowBoard.test(position)) {
-                Helper::printWithColor("Y ", "yellow");
-            }
-            else {
-                Helper::printWithColor(". ", "white");
-            }
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
+bool Board::check_win(uint64_t board)
+{
+	// Check horizontal, vertical, and diagonal connections for a win
+	return check_vertical_win(board)
+		|| check_horizontal_win(board)
+		|| check_diagonal(board);
 }
+
+bool Board::check_vertical_win(uint64_t board)
+{
+	auto vertical_mask = 0b1000000100000010000001ULL;
+
+	for (uint8_t offset = 0; offset < BOARD_HEIGHT - 3; offset++)
+	{
+		for (uint8_t col = 0; col < BOARD_WIDTH; col++)
+		{
+			uint64_t col_mask = vertical_mask << col + offset * BOARD_WIDTH;
+			if ((board & col_mask) == col_mask)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool Board::check_horizontal_win(uint64_t board)
+{
+	auto horizontal_mask = 0b1111ULL;
+
+	for (uint8_t offset = 0; offset < BOARD_WIDTH - 3; offset++)
+	{
+		for (uint8_t row = 0; row < BOARD_HEIGHT; row++)
+		{
+			uint64_t row_mask = horizontal_mask << (row * BOARD_WIDTH + offset);
+			if ((board & row_mask) == row_mask)
+			{
+				return true;
+			}
+		}
+	}
+
+
+	return false;
+}
+
+bool Board::check_diagonal(uint64_t board)
+{
+	auto diagonal_mask1 = 0b1000000010000000100000001ULL;
+	auto diagonal_mask2 = 0b1000001000001000001000ULL;
+
+	for (uint8_t offset = 0; offset < BOARD_HEIGHT - 4; offset++)
+	{
+		for (int8_t row = 0; row < 4; row++)
+		{
+			uint64_t diagonal1 = diagonal_mask1 << row + offset * BOARD_WIDTH;
+			uint64_t diagonal2 = diagonal_mask2 << row + offset * BOARD_WIDTH;
+			// Check if the diagonal matches the board
+			if ((board & diagonal1) == diagonal1 || (board & diagonal2) == diagonal2)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+

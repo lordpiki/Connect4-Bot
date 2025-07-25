@@ -1,27 +1,17 @@
 #include <iostream>
 #include "Board.h"
-#include "Bot.h"
-#include "Helper.h"
 #include <stdint.h>
-#define RED true
-#define YELLOW false    
+
 
 int main()
 {
+	Board board;
+	for (int i = 0; i < 4; ++i) {
+		board.play(i);
+		board.play(i);
+	}
 
-    uint64_t num = 1;
-    Board board;
-    board.isWinningMove(0, RED);
-    board.printBoard();
-    board.playMove(1, RED);
-    board.playMove(1, YELLOW);
-    board.playMove(2, RED);
-    board.playMove(2, YELLOW);
-    board.printBoard();
-    std::cout << Bot::miniMax(board, RED) << "\n";
+	board.print();
+	std::cout << "Game State: " << static_cast<int>(board.get_game_state()) << std::endl;
 
-
-
-    board.printBoard();
-    std::cout << "Win? " << board.checkWinForColor(RED) << "\n";
 }
