@@ -15,6 +15,8 @@ int main()
 	board.print();
 	board.unplay(0);
 	board.print();
+	board.unplay(0);
+	board.print();
 	std::cout << "Game State: " << static_cast<int>(board.get_game_state()) << std::endl;
 
 }

@@ -35,7 +35,7 @@ void Board::unplay(uint8_t cell)
 	auto& current_board = !m_redMove ? m_redBoard : m_yellowBoard;
 	auto full_board = m_redBoard | m_yellowBoard;
 
-	for (int8_t row = 0 ; row < BOARD_HEIGHT - 1; row++)
+	for (int8_t row = 0 ; row < BOARD_HEIGHT; row++)
 	{
 		auto mask = (1ULL << (row * BOARD_WIDTH + cell));
 
