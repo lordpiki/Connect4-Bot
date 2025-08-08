@@ -21,8 +21,6 @@ class Board {
 public:
 
 	Board() : m_redBoard(), m_yellowBoard(), m_numMoves(0), m_redMove(true), m_columnHeights{} {}
-    Board(uint64_t redBoard, uint64_t yellowBoard) : m_redBoard(redBoard), m_yellowBoard(yellowBoard), m_numMoves(0), m_redMove(0), m_columnHeights{} {}
-
 
     // Modifiers
     void play(uint8_t cell);

@@ -15,7 +15,7 @@ void Board::play(uint8_t cell)
 
 	auto& current_board = m_redMove ? m_redBoard : m_yellowBoard;
 
-	current_board |= (1ULL << (cell + (BOARD_HEIGHT - m_columnHeights[cell]) * BOARD_WIDTH));
+	current_board |= (1ULL << (cell + m_columnHeights[cell] * BOARD_WIDTH));
 	switch_turn();
 
 	m_columnHeights[cell]++; 
@@ -53,9 +53,9 @@ GameState Board::get_game_state() const
 
 void Board::print()
 {
-	// Print the entire board, with red and yellow pieces represented by 'R' and 'Y'
+	// Print the entire board, with red and yellow pieces represented by 'X' and 'O'
 	std::cout << "Current Board State:\n";
-	for (uint8_t row = 0; row < BOARD_HEIGHT; ++row) {
+	for (int8_t row = BOARD_HEIGHT - 1; row >= 0; --row) {
 		for (uint8_t col = 0; col < BOARD_WIDTH; ++col) {
 			uint8_t cell_index = row * BOARD_WIDTH + col;
 			if (m_redBoard & (1ULL << cell_index)) {

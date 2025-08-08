@@ -38,5 +38,7 @@ private:
 	// Returns UINT8_MAX if the game is over or if the current state does not match the expected state
 	// Otherwise, returns min_moves
 	uint8_t check_state(const Board& board, uint8_t move_count) const;
+	
+	// Updates the minimum moves if the current moves are less than the stored minimum
 	void update_min_moves(uint8_t moves);
 };

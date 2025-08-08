@@ -1,5 +1,6 @@
 #include "BoardScorer.h"
 
+
 uint8_t BoardScorer::rate_board(const Board& board, uint8_t move_count)
 {
     uint8_t state = check_state(board, move_count);
