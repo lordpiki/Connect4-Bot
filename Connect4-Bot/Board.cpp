@@ -9,43 +9,18 @@ void Board::play(uint8_t cell)
 		throw std::out_of_range("Cell index out of range");
 	}
 
+	if (m_columnHeights[cell] > BOARD_HEIGHT) {
+		throw std::invalid_argument("Column is full, cannot play here");
+	}
+
 	auto& current_board = m_redMove ? m_redBoard : m_yellowBoard;
-	auto full_board = m_redBoard | m_yellowBoard;
 
-	for (int8_t row = BOARD_HEIGHT - 1; row >= 0; row--)
-	{
-		auto mask = (1ULL << (row * BOARD_WIDTH + cell));
+	current_board |= (1ULL << (cell + (BOARD_HEIGHT - m_columnHeights[cell]) * BOARD_WIDTH));
+	switch_turn();
 
-		if (!(full_board& mask)) {
-			current_board |= mask;
-			switch_turn();
-			return;
-		}
-	}
-	throw std::invalid_argument("Column is full, cannot play here");
+	m_columnHeights[cell]++; 
+	m_numMoves++;
 
-}
-
-void Board::unplay(uint8_t cell)
-{
-	if (cell >= BOARD_WIDTH) {
-		throw std::out_of_range("Cell index out of range");
-	}
-
-	auto& current_board = !m_redMove ? m_redBoard : m_yellowBoard;
-	auto full_board = m_redBoard | m_yellowBoard;
-
-	for (int8_t row = 0 ; row < BOARD_HEIGHT; row++)
-	{
-		auto mask = (1ULL << (row * BOARD_WIDTH + cell));
-
-		if (full_board & mask) {
-			current_board ^= mask;
-			switch_turn();
-			return;
-		}
-	}
-	throw std::invalid_argument("Column is empty, cannot unplay here");
 }
 
 bool Board::is_cell_full(uint8_t cell) const
@@ -54,10 +29,7 @@ bool Board::is_cell_full(uint8_t cell) const
 		throw std::out_of_range("Cell index out of range");
 	}
 
-	auto full_board = m_redBoard | m_yellowBoard;
-	auto mask = (1ULL << cell);
-
-	return full_board & mask;
+	return m_columnHeights[cell] >= BOARD_HEIGHT;
 }
 
 GameState Board::get_game_state() const
@@ -87,9 +59,9 @@ void Board::print()
 		for (uint8_t col = 0; col < BOARD_WIDTH; ++col) {
 			uint8_t cell_index = row * BOARD_WIDTH + col;
 			if (m_redBoard & (1ULL << cell_index)) {
-				std::cout << 'O'; // Red piece
+				std::cout << 'X'; // Red piece
 			} else if (m_yellowBoard & (1ULL << cell_index)) {
-				std::cout << 'X'; // Yellow piece
+				std::cout << 'O'; // Yellow piece
 			} else {
 				std::cout << '.'; // Empty cell
 			}

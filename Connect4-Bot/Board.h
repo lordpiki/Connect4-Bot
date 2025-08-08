@@ -1,6 +1,7 @@
 #pragma once
 #include <bitset>
 #include <string>
+#include <array>
 
 using std::bitset;
 using std::string;
@@ -19,18 +20,18 @@ enum class GameState : uint8_t {
 class Board {
 public:
 
-    Board() : m_redBoard(), m_yellowBoard(), m_numMoves(0), m_redMove(0) {}
-    Board(uint64_t redBoard, uint64_t yellowBoard) : m_redBoard(redBoard), m_yellowBoard(yellowBoard), m_numMoves(0), m_redMove(0) {}
+	Board() : m_redBoard(), m_yellowBoard(), m_numMoves(0), m_redMove(true), m_columnHeights{} {}
+    Board(uint64_t redBoard, uint64_t yellowBoard) : m_redBoard(redBoard), m_yellowBoard(yellowBoard), m_numMoves(0), m_redMove(0), m_columnHeights{} {}
 
 
     // Modifiers
     void play(uint8_t cell);
-
-	// Unplay a move, used for undo functionality (Only for bot)
-    void unplay(uint8_t cell);
     
     // Checkers
     bool is_cell_full(uint8_t cell) const;
+	uint64_t get_red_board() const { return m_redBoard; }
+	uint64_t get_yellow_board() const { return m_yellowBoard; }
+	bool is_red_turn() const { return m_redMove; }
 
     // Getters
     GameState get_game_state() const;
@@ -48,6 +49,9 @@ private:
 
     // Number of moves played
     uint32_t m_numMoves;
+
+    // Collumn heights
+	std::array<uint8_t, BOARD_WIDTH> m_columnHeights;
 
 	// Current player's turn
     bool m_redMove;
