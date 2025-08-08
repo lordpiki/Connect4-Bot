@@ -25,7 +25,7 @@ uint8_t BoardScorer::rate_board(const Board& board, uint8_t move_count)
         // Store the result in cache before returning
         m_cache.cache[{new_board.get_red_board(), new_board.get_yellow_board()}] = score;
 
-        if (score == move_count + 1) // Best possible case
+        if (score == move_count + 1 && (new_board.is_red_turn() == m_checkingRed)) // Best possible case
         {
             return score;
         }

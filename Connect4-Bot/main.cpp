@@ -9,7 +9,7 @@ int main()
 	Board board;
 
 	board.play(0); // Red plays in column 0
-	board.play(0); // Yellow plays in column 0
+	//board.play(0); // Yellow plays in column 0
 	board.print();
 	std::cout << "Game State: " << static_cast<int>(board.get_game_state()) << std::endl;
 
