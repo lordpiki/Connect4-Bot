@@ -1,12 +1,19 @@
 #pragma once
-#include <map>
+#include <unordered_map>
 #include <stdint.h>
 #include "Board.h"
+
+
+struct Hash {
+	size_t operator()(const std::pair<uint64_t, uint64_t>& p) const {
+		return std::hash<uint64_t>()(p.first) ^ (std::hash<uint64_t>()(p.second) << 1);
+	}
+};
 
 class ScoreCache
 {
 public:
-	inline static std::map<std::pair<uint64_t, uint64_t>, uint8_t> cache;
+	inline static std::unordered_map<std::pair<uint64_t, uint64_t>, uint8_t, Hash> cache;
 };
 
 class BoardScorer
