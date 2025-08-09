@@ -9,17 +9,17 @@ void Board::play(uint8_t cell)
 		throw std::out_of_range("Cell index out of range");
 	}
 
-	if (m_columnHeights[cell] > BOARD_HEIGHT) {
+	if (m_column_heights[cell] > BOARD_HEIGHT) {
 		throw std::invalid_argument("Column is full, cannot play here");
 	}
 
-	auto& current_board = m_redMove ? m_redBoard : m_yellowBoard;
+	auto& current_board = m_red_move ? m_red_board : m_yellow_board;
 
-	current_board |= (1ULL << (cell + m_columnHeights[cell] * BOARD_WIDTH));
+	current_board |= (1ULL << (cell + m_column_heights[cell] * BOARD_WIDTH));
 	switch_turn();
 
-	m_columnHeights[cell]++; 
-	m_numMoves++;
+	m_column_heights[cell]++; 
+	m_num_moves++;
 
 }
 
@@ -29,21 +29,21 @@ bool Board::is_cell_full(uint8_t cell) const
 		throw std::out_of_range("Cell index out of range");
 	}
 
-	return m_columnHeights[cell] >= BOARD_HEIGHT;
+	return m_column_heights[cell] >= BOARD_HEIGHT;
 }
 
 GameState Board::get_game_state() const
 {
-	if (m_numMoves == BOARD_WIDTH * BOARD_HEIGHT)
+	if (m_num_moves == BOARD_WIDTH * BOARD_HEIGHT)
 	{
 		return GameState::Draw; // Board is full, it's a draw
 	}
 
-	if (check_win(m_redBoard))
+	if (check_win(m_red_board))
 	{
 		return GameState::RedWon; // Red player has won
 	}
-	if (check_win(m_yellowBoard))
+	if (check_win(m_yellow_board))
 	{
 		return GameState::YellowWon; // Yellow player has won
 	}
@@ -58,9 +58,9 @@ void Board::print()
 	for (int8_t row = BOARD_HEIGHT - 1; row >= 0; --row) {
 		for (uint8_t col = 0; col < BOARD_WIDTH; ++col) {
 			uint8_t cell_index = row * BOARD_WIDTH + col;
-			if (m_redBoard & (1ULL << cell_index)) {
+			if (m_red_board & (1ULL << cell_index)) {
 				std::cout << 'X'; // Red piece
-			} else if (m_yellowBoard & (1ULL << cell_index)) {
+			} else if (m_yellow_board & (1ULL << cell_index)) {
 				std::cout << 'O'; // Yellow piece
 			} else {
 				std::cout << '.'; // Empty cell
