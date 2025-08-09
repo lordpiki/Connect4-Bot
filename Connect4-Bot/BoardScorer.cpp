@@ -9,9 +9,11 @@ uint8_t BoardScorer::rate_board(const Board& board, uint8_t move_count)
         return state;
     }
 
+	auto mask = board.get_available_moves_mask();
     for (uint8_t cell = 0; cell < BOARD_WIDTH; ++cell)
     {
-        if (board.is_cell_full(cell))
+		// Check if the column is full
+        if (mask & (1 << cell))
         {
             continue; // Skip full columns
         }

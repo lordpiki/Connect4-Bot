@@ -22,7 +22,7 @@ int main()
 
 	std::cout << "Calculating best move" << std::endl;
 	auto start = std::chrono::high_resolution_clock::now();
-	auto best_move = solver.calculate_best_move(board, 6); // Calculate the best move for the current board state
+	auto best_move = solver.calculate_best_move(board, 14); // Calculate the best move for the current board state
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	std::cout << "Best move calculated in " << duration.count() << " ms" << std::endl;

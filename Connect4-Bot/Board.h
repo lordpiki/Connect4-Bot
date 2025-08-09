@@ -34,6 +34,7 @@ public:
     // Getters
     GameState get_game_state() const;
 	uint32_t get_num_moves() const { return m_num_moves; }
+    uint8_t get_available_moves_mask() const;
 
     // Setters
 	void set_red_board(uint64_t red_board) { m_red_board = red_board; }

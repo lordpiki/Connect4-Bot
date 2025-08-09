@@ -51,6 +51,19 @@ GameState Board::get_game_state() const
 	return GameState::InProgress;
 }
 
+uint8_t Board::get_available_moves_mask() const
+{
+	uint8_t mask = 0;
+	for (uint8_t col = 0; col < BOARD_WIDTH; ++col)
+	{
+		if (m_column_heights[col] <= BOARD_HEIGHT)
+		{
+			mask |= (1 << col); // Set the bit for available columns
+		}
+	}
+	return mask;
+}
+
 void Board::print()
 {
 	// Print the entire board, with red and yellow pieces represented by 'X' and 'O'

@@ -5,7 +5,7 @@ uint8_t BoardSolver::calculate_best_move(const Board& board, uint8_t max_moves)
 {
 	// If the game ended
 	uint8_t best_move = 0;
-	int32_t best_score = 0;
+	int32_t best_score = INT32_MIN;
 	for (uint8_t cell = 0; cell < BOARD_WIDTH; cell++)
 	{
 		if (board.is_cell_full(cell))
@@ -54,12 +54,15 @@ int32_t BoardSolver::minimax(const Board& board, uint8_t max_depth, int32_t alph
 
 	int32_t best_score = maximizing_player ? INT32_MIN : INT32_MAX;
 
-	for (uint8_t cell = 0; cell < BOARD_WIDTH; cell++)
+	auto mask = board.get_available_moves_mask();
+	for (uint8_t cell = 0; cell < BOARD_WIDTH; ++cell)
 	{
-		if (board.is_cell_full(cell))
+		// Check if the column is full
+		if (mask & (1 << cell))
 		{
 			continue; // Skip full columns
 		}
+
 		auto new_board = board; // Create a copy of the board to explore this move
 		// Play move and get the score for the next depth
 		new_board.play(cell);
