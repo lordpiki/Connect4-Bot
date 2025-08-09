@@ -12,6 +12,6 @@ private:
 	
 	// Minimax algorithm to evaluate the board state
 	// Returns the score of the board for the maximizing player
-	int32_t minimax(const Board& board, uint8_t depth, bool maximizing_player);
+	int32_t minimax(const Board& board, uint8_t depth, int32_t alpha, int32_t beta, bool maximizing_player);
 };
 
