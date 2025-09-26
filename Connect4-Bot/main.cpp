@@ -8,9 +8,8 @@
 void setup_board(Board& board)
 {
 	// Initialize the board with some moves
-	board.set_red_board(8391062); // Example red pieces
-	board.set_yellow_board(98857); // Example yellow pieces
-	//board.play(4); // Play a move in column 4
+	board.set_red_board(8392086); // Example red pieces
+	board.set_yellow_board(361001); // Example yellow pieces
 	
 }
 

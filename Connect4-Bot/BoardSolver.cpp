@@ -53,7 +53,7 @@ int32_t BoardSolver::minimax(const Board& board, uint8_t max_depth, int32_t alph
 	{
 		// Staticly evaluate the board
 		// Guess how many moves are left to win
-		return (BOARD_HEIGHT * BOARD_WIDTH - BoardScorer::rate_board(board, 1)) * score_muiltiplier;
+		return (BOARD_HEIGHT * BOARD_WIDTH - BoardScorer::rate_board(board, maximizing_player));
 	}
 
 	int32_t best_score = maximizing_player ? INT32_MIN : INT32_MAX;

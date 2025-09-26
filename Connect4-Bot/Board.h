@@ -29,7 +29,7 @@ public:
     void play(uint8_t cell);
 
     // Checkers
-	bool is_cell_full(uint8_t cell) const { return !BitmapHelper::is_bit_set(m_available_moves_maks, cell); }
+	bool is_cell_full(uint8_t cell) const { return BitmapHelper::is_bit_set(m_available_moves_maks, cell); }
 	bool is_red_turn() const { return m_red_move; }
 	
     // Getters
