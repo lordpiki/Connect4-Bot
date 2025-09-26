@@ -1,11 +1,13 @@
 #include "BoardSolver.h"
 #include "BoardScorer.h"
+#include <iostream>
 
 uint8_t BoardSolver::calculate_best_move(const Board& board, uint8_t max_moves)
 {
-	// If the game ended
 	uint8_t best_move = 0;
 	int32_t best_score = INT32_MIN;
+
+	std::cout << "Score for each cell: " << std::endl;
 	for (uint8_t cell = 0; cell < BOARD_WIDTH; cell++)
 	{
 		if (board.is_cell_full(cell))
@@ -17,6 +19,7 @@ uint8_t BoardSolver::calculate_best_move(const Board& board, uint8_t max_moves)
 		new_board.play(cell);
 		
 		int32_t score = minimax(new_board, max_moves - 1, INT32_MIN, INT32_MAX, true);
+		std::cout << "Cell " << static_cast<int>(cell) << ": " << score << std::endl;
 		if (score > best_score)
 		{
 			best_score = score;
@@ -41,24 +44,24 @@ int32_t BoardSolver::minimax(const Board& board, uint8_t max_depth, int32_t alph
 		
 		// Encourage to win in as few moves as possible
 		// Score = number of empty cells left
-		return (BOARD_HEIGHT * BOARD_WIDTH - board.get_num_moves()) * score_muiltiplier;
+
+		// THIS MAY BE BUGGY - needs testing
+		return board.get_empty_cells_count() * score_muiltiplier;
 	}
 
 	if (max_depth == 0)
 	{
-		BoardScorer scorer(board.is_red_turn());
 		// Staticly evaluate the board
 		// Guess how many moves are left to win
-		return (BOARD_HEIGHT * BOARD_WIDTH - scorer.rate_board(board, 0)) * score_muiltiplier;
+		return (BOARD_HEIGHT * BOARD_WIDTH - BoardScorer::rate_board(board, 1)) * score_muiltiplier;
 	}
 
 	int32_t best_score = maximizing_player ? INT32_MIN : INT32_MAX;
 
-	auto mask = board.get_available_moves_mask();
 	for (uint8_t cell = 0; cell < BOARD_WIDTH; ++cell)
 	{
-		// Check if the column is full
-		if (mask & (1 << cell))
+		// Check if there's a move available
+		if (board.is_cell_full(cell))
 		{
 			continue; // Skip full columns
 		}
@@ -91,3 +94,4 @@ int32_t BoardSolver::minimax(const Board& board, uint8_t max_depth, int32_t alph
 	return best_score;
 
 }
+

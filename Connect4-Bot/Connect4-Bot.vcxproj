@@ -129,12 +129,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BitmapHelper.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="BoardScorer.cpp" />
     <ClCompile Include="BoardSolver.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BitmapHelper.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="BoardScorer.h" />
     <ClInclude Include="BoardSolver.h" />

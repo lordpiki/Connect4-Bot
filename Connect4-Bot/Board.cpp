@@ -13,24 +13,22 @@ void Board::play(uint8_t cell)
 		throw std::invalid_argument("Column is full, cannot play here");
 	}
 
+	// Set the appropriate bit in the current player's board
 	auto& current_board = m_red_move ? m_red_board : m_yellow_board;
-
-	current_board |= (1ULL << (cell + m_column_heights[cell] * BOARD_WIDTH));
+	current_board = BitmapHelper::set_bit(current_board, cell + m_column_heights[cell] * BOARD_WIDTH);
 	switch_turn();
 
 	m_column_heights[cell]++; 
 	m_num_moves++;
 
-}
-
-bool Board::is_cell_full(uint8_t cell) const
-{
-	if (cell >= BOARD_WIDTH) {
-		throw std::out_of_range("Cell index out of range");
+	// Update available moves mask
+	if (m_column_heights[cell] >= BOARD_HEIGHT)
+	{
+		m_available_moves_maks = BitmapHelper::set_bit(m_available_moves_maks, cell);
 	}
-
-	return m_column_heights[cell] >= BOARD_HEIGHT;
 }
+
+
 
 GameState Board::get_game_state() const
 {
@@ -51,18 +49,7 @@ GameState Board::get_game_state() const
 	return GameState::InProgress;
 }
 
-uint8_t Board::get_available_moves_mask() const
-{
-	uint8_t mask = 0;
-	for (uint8_t col = 0; col < BOARD_WIDTH; ++col)
-	{
-		if (m_column_heights[col] <= BOARD_HEIGHT)
-		{
-			mask |= (1 << col); // Set the bit for available columns
-		}
-	}
-	return mask;
-}
+
 
 void Board::print()
 {
@@ -80,6 +67,26 @@ void Board::print()
 			}
 		}
 		std::cout << '\n';
+	}
+
+	std::cout << "Current turn: " << (m_red_move ? "Red (X)" : "Yellow (O)") << "\n";
+}
+
+void Board::update_heights()
+{
+	// Function goes from the bottom up, and increments the height of each column until it finds an empty cell
+	m_column_heights.fill(0);
+	auto combined_board = BitmapHelper::combine_masks(m_red_board, m_yellow_board);
+	for (uint8_t i = 0; i < BOARD_HEIGHT; i++)
+	{
+		for (uint8_t col = 0; col < BOARD_WIDTH; col++)
+		{
+			uint8_t cell_index = i * BOARD_WIDTH + col;
+			if (BitmapHelper::is_bit_set(combined_board, cell_index))
+			{
+				m_column_heights[col]++;
+			}
+		}
 	}
 }
 

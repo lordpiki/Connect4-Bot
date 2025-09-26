@@ -1,6 +1,13 @@
 #pragma once
 #include "Board.h"
 
+//class SolveCache
+//{
+//public:
+//	inline static std::unordered_map<std::pair<uint64_t, uint64_t>, uint8_t, Hash> cache;
+//};
+//
+
 class BoardSolver
 {
 public:
@@ -13,5 +20,6 @@ private:
 	// Minimax algorithm to evaluate the board state
 	// Returns the score of the board for the maximizing player
 	int32_t minimax(const Board& board, uint8_t depth, int32_t alpha, int32_t beta, bool maximizing_player);
+
 };
 
